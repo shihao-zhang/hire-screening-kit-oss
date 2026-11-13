@@ -54,8 +54,7 @@ python3 core/score_engine.py --config <你的私有岗位配置.toml> --workspac
 
 数据截至 2026-11-13。
 
-<details>
-<summary>查看阶段分布与规则评分</summary>
+### 阶段分布与规则评分
 
 下表按统计日所在阶段归并，人数为近似量级。
 
@@ -66,8 +65,6 @@ python3 core/score_engine.py --config <你的私有岗位配置.toml> --workspac
 | 面试后推进与入职 | 约 20 |
 
 规则总分的中位数为 62.8，第 25 和第 75 百分位分别为 51.7 和 73.5。
-
-</details>
 
 ## 状态
 
