@@ -1,0 +1,9 @@
+# 任何真实运营数据/私有实例配置永不入本仓
+workspace/
+*.ndjson
+*.local.toml
+sensitive_patterns.txt
+
+__pycache__/
+*.pyc
+.DS_Store

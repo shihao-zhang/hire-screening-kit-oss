@@ -1,0 +1,281 @@
+# 岗位配置示例 —— 复制为你的私有实例配置(放在 kit 仓外!),逐段替换。
+# 原则:代码是机制,本文件是策略。所有名单/阈值都应来自你的校准,示例值仅为格式演示。
+# ⚠️ 你的真实配置含商业判断(公司分层名单)与校准案例,不要提交进本仓。
+
+# 技能分插值曲线:[加权命中数, 分数] 控制点。
+# 校准方法:跑全池后取 whits 的 p10/p25/p50/p75/p90 做锚点,保证低中高全域有梯度。
+skills_curve = [
+    [0.0, 12], [1.2, 30], [2.4, 44], [3.9, 58],
+    [5.9, 72], [8.1, 86], [11.0, 96], [13.5, 100],
+]
+
+[run]
+# 评分基准日期:显式固定,不随跑分日期漂移(复现性纪律)
+now_year = 2026
+now_month = 1
+now_ms = 1767225600000  # 精读网 recency 判定基准(毫秒时间戳)
+
+[llm_scope]
+main_th = 70          # 主网:总分>=此值一律精读(与池规模无关的质量线)
+recent_days = 21      # 近期放宽窗口(天)
+recent_th = 66        # 近期投递的放宽门槛
+backing_co = 95       # 强背书召回:company 分项>=此值
+backing_default_role = "A-方向一"   # 召回子句要求 role_fit ≠ 此默认值(收紧精度)
+# 顶尖背书召回(可选,缺省不配 = 旧行为):规则层 pedigree 标签命中列表即进精读,不看总分。
+# 标签取值为 双背书/名校/大厂/强校/无;"强校"是普通 985/211,通常**不应**纳入顶尖档。
+# pedigree_recall = ["双背书", "名校", "大厂"]
+
+[job]
+# 源侧工作年限字段缺失时,是否从 career_list 推算(可选,缺省 false = 旧行为:缺失一律按兜底分)。
+#   推算只算非实习段、按月合并重叠、在职段截到评分基准月;完全没有非实习经历仍按缺失处理。
+#   建议开启:实测某实例 19.4% 的人缺该字段,含有 14 年大厂经历的终点真阳性被打成兜底分。
+years_derive_from_careers = false
+years_min = 1
+years_max = 3
+# 年限曲线形状——「要资深」还是「要年轻」是岗位策略。缺省即下列值(资深几乎不掉分):
+#   years_fresh = 70   应届/不足下限一年内的得分
+#   years_below = 40   更少
+#   years_decay = 5    超出 years_max 后每年扣分
+#   years_floor = 70   资深下限
+# 若岗位偏好年轻可塑(先做功能产品、能力内部培养),用 90 / 40 / 8 / 40:
+#   ⇒ 应届90、3年内100、5年84、8年60、12年40
+fresh_grad_stability = 60   # 纯实习无全职履历者的 stability 取值(60=不因应届扣分)
+
+[roles]
+# 一个 JD 若捆绑两个子方向,分别配置关键词表;单方向岗位可把 role_b 留空表
+role_a_label = "A-方向一"
+role_b_label = "B-方向二"
+role_both_label = "两者皆可/不明确"
+role_none_label = "不明确"
+role_fit_ratio = 1.3        # 一侧命中数超另一侧此倍数才判定倾向
+role_a_keywords = ["agent", "rag", "产品经理", "解决方案", "知识库"]
+role_b_keywords = ["评测", "benchmark", "sft", "标注", "数据飞轮"]
+
+[companies]
+# 公司分层是你的商业判断,示例仅演示格式。匹配为子串、对 lower() 后文本。
+# 双背书叠加:学校与公司**都有**背书时在 max 之上再加。缺省 0 = 旧的取 max(双背书与单背书同分)
+joint_bonus = 0.20
+tier1 = ["示例大厂a", "example-corp"]
+tier2 = ["示例中厂b"]
+pedigree = ["示例大厂a"]        # 严格版背书名单(bar 高于 tier1 宽名单)
+ai_native = ["示例ai公司c"]     # 判定"最近 AI 经历的公司环境"用
+tech_extra = ["示例转型公司d"]  # AI 转型激进的非典型"传统"公司,先于传统正则判为 tech
+# 赛道同构名单(可选,缺省为空):公司**主营产品**是否与本岗所在赛道相同。
+#   **不参与任何打分**,只写进 dossier 的每段经历(track_peer 布尔),供 LLM 精读层做语义判断。
+#   适用场景:人工反馈反复用"公司在不在这条赛道上/够不够前沿"推翻你的判定,而公司维度
+#   只分大厂档位、不分赛道时。口径要窄——只收主营就是这个的公司,不收大公司里的一条业务线、
+#   不收自建自用,否则会与"传统企业 AI 深度存疑"那类判据直接打架。**只作正向证据,反向不成立**。
+track_peer = ["示例同赛道厂商e"]
+
+# ── 头部加权:背书档位与带宽(全部可选,缺省逐字节复现旧的二值行为)──────────────
+# endorse_weight:公司背书**分档**。缺省 {pedigree=1.0} 即二值(命中严格名单=1.0,否则 0)。
+#   二值的问题:「任何一段大厂经历」= 顶尖名校,一旦拉大档间差距,名校会被大厂压过。
+#   ⚠️ 口径与 company_hit 一致(同一份 pedigree 名单 + 同一条实习规则),只向下延伸档位。
+[companies.endorse_weight]
+pedigree = 0.95
+tier1 = 0.80
+tier2 = 0.48
+
+# 公司分档位表。缺省 tier1=100 / tier2=70 / other=50(无 pedigree 档)
+[companies.tier_score]
+pedigree = 100
+tier1 = 85
+tier2 = 70
+other = 50
+
+[schools]
+penalty_floor = 0.90   # 无任何背书时的总分乘数下限。**这一条决定「头部权重」的总带宽**:
+                       #   floor 0.90 = 带宽只有 10pp,顶档与次档几乎拉不开;调低即放大档间差距。
+elite_cn = ["清华", "北大"]
+elite_en = ["mit", "stanford"]
+t1 = ["清华", "北京大学"]        # 顶尖
+t2 = ["同济", "香港大学"]        # 准顶尖/强校
+t3 = ["深圳大学"]                # 温和加成档
+# T3 是前缀锚定(防「河南电子科技大学」撞「电子科技大学」),候选人写成「<国名><校名>」或
+# 「The University of …」时会静默匹配失败。可列出匹配前要剥掉的前缀;只放国名与 "the ",
+# 不要放省份或「中国」。缺省 [] = 不剥。
+t3_strip_prefixes = []
+indep_college = ["珠海学院"]     # 独立学院/民办,不给学校背书(防借名校名沾光)
+
+[schools.abbr_tier]
+# 易撞车中文缩写 → 前缀锚定(避免"南大"撞海南大学等),值=档位
+"北大" = 1
+"哈工大" = 2
+
+[schools.tier_weight]
+"1" = 1.0
+"2" = 0.9
+"3" = 0.3
+
+# 学历分的名校加成**按档分级**(可选)。缺省 = elite_bonus_tiers 内一律 +10、其余 0,档间无梯度
+[schools.tier_bonus]
+"1" = 15
+"2" = 10
+"3" = 5
+
+[degrees.label]
+"1" = "小学"
+"2" = "初中"
+"3" = "中职"
+"4" = "高中"
+"5" = "大专"
+"6" = "本科"
+"7" = "硕士"
+"8" = "博士"
+"9" = "其它"
+
+[degrees.score]
+"1" = 10
+"2" = 15
+"3" = 20
+"4" = 20
+"5" = 40
+"6" = 70
+"7" = 85
+"8" = 100
+"9" = 30
+
+[majors]
+cs = ["计算机", "软件", "computer"]
+quant = ["数学", "统计"]
+eng = ["电子", "自动化"]
+biz = ["工商管理", "金融"]
+
+[signals]
+# 正则均为 Python re 语法;除 ops_title_pattern 与 trad_company_pattern 外都以 IGNORECASE 编译
+quant_pattern = '\d+\s*(%|倍|w|万|k|亿|qps|ms|用户)'
+ownership_markers = ["主导", "从0到1", "负责人"]
+support_markers = ["协助", "配合", "维护"]
+self_assessment_headers = ["自我评价", "个人优势", "核心技能"]   # 命中即截断,不进技能语料
+trad_company_pattern = '银行|保险|运营商|制造|能源'
+ai_stint_pattern = 'agent|大模型|llm|人工智能'
+tool_claim_pattern = 'claude|cursor|langchain|mcp'   # 前沿工具名=自陈美化高发区,只标注不豁免
+hard_depth_pattern = '\bsft\b|rlhf|微调|后训练'       # 训练侧硬词难伪装,可豁免浅环境罚分
+owner_evidence_pattern = 'prd|产品规划|用户调研|从0到1'
+exec_evidence_pattern = '交付|实施|标注|审核|运维'
+owner_title_pattern = '产品经理|产品负责人'
+exec_title_pattern = '解决方案|交付|运营|标注'
+ops_title_pattern = '标注员|审核员|客服'
+pm_title_pattern = '产品经理|\bpm\b'
+intern_title_pattern = '实习|兼职|\bintern\b'
+
+[thresholds]
+ai_stale_months = 24        # AI 经历断档超此月数 → 乘数惩罚
+short_stint_months = 6      # 短任职判定:任期≤此值
+short_stint_window = 30     # 且结束在近此月数内(实习/在职豁免)
+verbose_l1 = 5000           # 简历描述总字数分位锚点(建议取全池 p95/p99)
+verbose_l2 = 7000
+recency_fresh_months = 12   # 近此月数的经历满权重
+recency_decay_months = 48   # 之后线性衰减跨度
+# 项目经历可信度折扣。project_list 会喂给 skills/project/owner-exec(见 core 里的
+# build_project_entries),但项目描述自选、无雇主与绩效约束、难核实,应折权。
+# 缺省 1.0/1.0 = 与工作经历等同(复刻旧行为);实测建议 0.7/0.6。
+project_trust = 1.0
+project_nodate_trust = 1.0
+recency_floor = 0.55        # 衰减下限(不因一次转向折掉全部积累)
+missing_date_weight = 0.7   # 经历缺日期给中性偏高权重
+mult_shallow_env = 0.97     # 传统企业 AI 经历且无硬深度证据
+mult_ai_stale = 0.97
+
+[thresholds.verbose_mult]
+"1" = 0.97
+"2" = 0.94
+
+[thresholds.years_skills_guard]
+# 年限达标但技能几乎零命中 → 年限分打折(很可能不是目标领域的年限)
+min_years_score = 80
+max_skills_score = 15
+downgrade_to = 60
+
+[weights]
+# 总和=1;每次调整先"模拟不落盘"跑全量,血范围看"谁进出精读网"
+education = 0.15
+major = 0.10
+years = 0.15
+skills = 0.25
+company = 0.15
+stability = 0.10
+project = 0.10
+
+[report]
+title = "# 简历筛选报告 — <岗位名> (job_id <你的job_id>)"
+notes = [
+    "该职位 JD 捆绑两个子方向,评分按并集关键词,`role_fit` 列区分倾向:",
+    "- **A-方向一**:……",
+    "- **B-方向二**:……",
+]
+years_note = "（应届/3+年经验亦可，已在 years 维度体现容忍度）"
+pending_stages = ["简历筛选", "简历初筛", "简历评估"]   # 你的飞书招聘流程里"待处理"阶段名
+
+# ══════════ 飞轮件配置(label_store/harness/attribution/dashboard/merge/适配层) ══════════
+
+[labels]
+endpoint_stages = ["已入职", "面试通过", "Offer沟通", "待入职"]   # 你的流程里算"终点真阳性"的阶段名
+staff_ids = []                       # 内部记录混入候选池时填 application_id,候选人身份不计标签
+endpoint_exclude_ids = []            # 走到终点阶段但并非经本管道筛选流入的记录(如上级直接召回的历史候选人),
+endpoint_require_hm_interview = false # 终点正样本默认要求 HM 本人在面试轮里出现过(同事代面不算);
+                                     # 缺省 false = 不设此门槛
+endpoint_hm_exemption_ids = []       # 「特别标注样本」:无 HM 面试仍计正样本的人,HM 逐人确认后填
+                                     # 不计终点正样本,其余标签照常;须 HM 逐条确认,不得自动推断
+manual_verdicts = ["通过", "待定", "不通过"]   # 人工评语【X】格式约定
+rankhint_pattern = '排名\s*\d*\s*(偏高|偏低)'   # 允许夹名次数字:「排名 16 偏高」;'粗排名…'亦匹配
+tz_hours = 8
+
+[harness]
+ltr_threshold = 50          # 强标签达此数量才值得评估 learning-to-rank
+rule_recall_top_pct = 40    # 终点真阳性理应落在规则排序前 N%
+sys_rate_pass_pct = 75      # 两层系统一致率 PASS 线
+collapse_pct = 50           # 单档占比超此值=分布塌缩(判别力丢失)
+saturate_pct = 20           # 顶档[80+]占比超此值=饱和(天花板打满)
+# 以下为报告文案(你的实例校准史写进去;harness 报告原样引用)
+manual_header = "### §2a 人工评估 × 规则层 / 两层系统\n"
+recall_preamble = "> **两层分开量**：**规则层召回**=rank 是否进前段，衡量粗排有没有把真阳性埋掉；\n> **系统召回**=是否进 LLM 精读网 **且** 没被判「不推荐」，衡量两层系统整体交付给人的是什么。\n"
+validity_note = "\n> ⚠️ **效度声明**：召回子句若由已知锚点归因设计而来，锚点进网是「按设计生效」而非泛化证据；本指标的正确用途是**回归护栏**。要证明泛化，只能等设计之后新产生的终点真阳性检验。\n"
+gate_sys_suffix = "（⚠️护栏口径，非泛化证据）"
+iv_note_suffix = "（面试官宽严方差大，故仅参考）"
+
+[attribution]
+high_rank_th = 80           # 人工否但规则 rank≤此值 → 归为"系统推人工否"硬分歧
+title = "# 待归因队列（人在环）"
+hitl_note = "> 本队列只列**现象与维度定位**，不给规则改动建议——改什么由人拍板。"
+
+[dashboard]
+title = "# 简历筛选管道 · 常驻看板"
+overwrite_warning = "> ⚠️ 本文档由编排器每轮自动全量覆写——请勿手动编辑或划词评论；讨论请另开文档。"
+# 注意:不在 stage_order 里的阶段只计入投递总数,不进漏斗表(如把"简历筛选"未处理池排除在外);
+# 想全显示就把 report.pending_stages 里的阶段名也加进来
+stage_order = ["简历初筛", "简历评估", "评估通过", "一面", "二面", "三面", "面试通过", "Offer沟通", "待入职", "已入职"]
+late_stages = ["三面", "面试通过", "Offer沟通", "待入职", "已入职"]
+
+[merge]
+# 合并范围:"dossiers"(缺省,旧行为)= 档案目录里现存档案的人——由删除历史决定的偶然集合,清空过目录后
+# 之前出网者的结论再也进不了 merged;"net" = 当前精读网;"reviewed" = 精读过的全部候选人(推荐)。
+# 后两种的缺漏检查都只针对当前精读网。
+scope = "dossiers"
+valid_direction = ["A-方向一", "B-方向二", "两者皆可", "方向偏移"]   # 与 rubric 输出 schema 一致
+valid_verdict = ["推荐面试", "待定", "不推荐"]
+watch_verdict = "推荐面试"          # 劣化哨兵盯的终版结论
+rank_keys = ["rank_v1"]             # dossier 里的 rank 字段名(体系升版后追加旧名做回退链)
+dossier_rank_key = "rank_v1"
+manual_evals = "out/manual_evals_v2.json"
+override_globs = []                 # 修正/重评批,按优先级排列(first-wins)
+main_globs = ["batch_*.json"]       # 常规批次,按注册顺序
+archived_globs = []                 # 退役 rubric 版本的历史批,只喂劣化哨兵不进合并
+
+[feishu]
+job_id = "75xxxxxxxxxxxxxxxxx"      # 飞书招聘职位 id(detect_new/build_payloads 读取)
+# 多岗位(同时筛正式岗+实习岗)时列出全部要纳入探测的 job_id;不配则只看上面单键。
+# 注意:build_payloads/sync_bitable 只写主表(job_id);多岗位时其它岗位需各自建表同步。
+# job_ids = ["75xxxxxxxxxxxxxxxxx", "75yyyyyyyyyyyyyyyyyyy"]
+detail_url_template = "https://<你的租户>.feishu.cn/hire/talent/{tid}?application_id={aid}&job_id={job}"
+# 注意:bitable 的 app_token/table_id 不在本文件——shell 适配层走环境变量
+# HSK_BASE_TOKEN / HSK_TABLE_ID(见 adapters/feishu/env.example.sh),避免双源。
+
+[dossier]
+# 从精读档案里撤掉的规则标志位(可选,缺省 [] = 全部保留)。评分引擎照常计算,只是不喂给 LLM。
+# 适用:某标志位经标签检验无判别力、且反复误导精读判断时。先用置换检验证明它没用,再撤。
+omit_rule_flags = []
+# 建档范围来源:"need_review_ids"(缺省,读 out/need_review_ids.txt)| "report"(直接取 report.csv 的
+# llm_scope=true)。前者依赖轮内另行刷新那份清单,评分变动后忘刷就会静默少建档;建议用 "report"。
+scope_source = "need_review_ids"
+
