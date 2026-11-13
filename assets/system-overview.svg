@@ -1,6 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="876" viewBox="0 0 1200 876" role="img" aria-labelledby="title description">
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="972" viewBox="0 0 1200 972" role="img" aria-labelledby="title description">
   <title id="title">hire-screening-kit 架构图</title>
-  <desc id="description">飞书招聘只读接入。投递进入私有工作区，由规则粗排和 LLM 精读，再经人工确认同步多维表格并回读。HM 复核并决策，HR 触达与跟进。人工评估和面试进展进入手动飞轮，形成回归护栏、归因和看板。规则调整先模拟，再由人确认。</desc>
+  <desc id="description">飞书招聘只读接入。投递进入私有工作区，由规则粗排和 LLM 精读，再经人工确认同步多维表格并回读。HM 复核并决策，HR 触达与跟进。面试官开展面试并记录面评与结论。人工评估和面试结果进入手动飞轮，形成回归护栏、归因和看板。规则调整先模拟，再由人确认。</desc>
   <defs>
     <marker id="arrow" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="6" markerHeight="6" orient="auto">
       <path d="M0 0 10 5 0 10z" fill="#607e70"/>
@@ -24,7 +24,7 @@
     </style>
   </defs>
 
-  <rect width="1200" height="876" fill="#f8f7f3"/>
+  <rect width="1200" height="972" fill="#f8f7f3"/>
   <text class="title" x="64" y="66">hire-screening-kit</text>
   <text class="subtitle" x="64" y="103">简历筛选架构 · 两层漏斗与数据飞轮</text>
 
@@ -88,48 +88,59 @@
     <path class="flow" d="M918 414H940"/>
   </g>
 
-  <path class="return" d="M1040 481V548H186V614"/>
-  <text class="return-label" x="1021" y="535" text-anchor="end">人工评估与面试进展回流</text>
+  <path class="flow" d="M1040 481V519"/>
+  <text class="meta" x="1054" y="508">进入面试</text>
 
-  <g aria-label="手动运营飞轮">
-    <text class="section" x="64" y="598">运营飞轮</text>
-    <text class="meta" x="1136" y="597" text-anchor="end">操作者在场触发 · flywheel.sh</text>
-
-    <g>
-      <rect x="64" y="620" width="244" height="124" rx="12" fill="#edf1eb"/>
-      <text class="heading" x="81" y="659">刷新阶段与标签</text>
-      <text class="detail" x="81" y="691">汇总人工评估、面试信号</text>
-      <text class="code" x="81" y="721">label_store.py</text>
-    </g>
-    <g>
-      <rect x="340" y="620" width="244" height="124" rx="12" fill="#edf1eb"/>
-      <text class="heading" x="357" y="659">检查回归护栏</text>
-      <text class="detail" x="357" y="691">复核召回与进出网变化</text>
-      <text class="code" x="357" y="721">harness.py</text>
-    </g>
-    <g>
-      <rect x="616" y="620" width="244" height="124" rx="12" fill="#edf1eb"/>
-      <text class="heading" x="633" y="659">生成归因队列</text>
-      <text class="detail" x="633" y="691">列出漏召回等异常线索</text>
-      <text class="code" x="633" y="721">attribution.py</text>
-    </g>
-    <g>
-      <rect x="892" y="620" width="244" height="124" rx="12" fill="#eef0f4"/>
-      <text class="heading" x="909" y="659">更新看板</text>
-      <text class="detail" x="909" y="691">汇总本轮进展与指标</text>
-      <text class="code" x="909" y="721">dashboard.py</text>
-    </g>
-
-    <path class="flow" d="M310 682H336"/>
-    <path class="flow" d="M586 682H612"/>
-    <path class="flow" d="M862 682H888"/>
+  <g aria-label="人工面试">
+    <rect x="892" y="524" width="244" height="84" rx="12" fill="#f3eee3" stroke="#c8b290"/>
+    <text class="heading" x="909" y="556">人工面试</text>
+    <text class="human-tag" x="1120" y="554" text-anchor="end">HITL</text>
+    <text class="detail" x="909" y="586">面试官记录面评与结论</text>
   </g>
 
-  <path class="return" d="M738 746V794H28V192H59"/>
-  <text class="return-label" x="714" y="781" text-anchor="end">先模拟，再由 HM 确认规则变更</text>
+  <path class="return" d="M1040 610V644H186V710"/>
+  <path d="M964 481V504H846V644" fill="none" stroke="#846b42" stroke-width="2.3" stroke-dasharray="7 6" stroke-linejoin="round"/>
+  <text class="return-label" x="830" y="631" text-anchor="end">人工评估与面试结果回流</text>
 
-  <path class="flow" d="M65 835H101"/>
-  <text class="meta" x="113" y="842">工作流</text>
-  <path class="return" d="M224 835H260"/>
-  <text class="meta" x="272" y="842">反馈与人工校准</text>
+  <g aria-label="手动运营飞轮">
+    <text class="section" x="64" y="694">运营飞轮</text>
+    <text class="meta" x="1136" y="693" text-anchor="end">操作者在场触发 · flywheel.sh</text>
+
+    <g>
+      <rect x="64" y="716" width="244" height="124" rx="12" fill="#edf1eb"/>
+      <text class="heading" x="81" y="755">刷新阶段与标签</text>
+      <text class="detail" x="81" y="787">汇总人工评估、面试信号</text>
+      <text class="code" x="81" y="817">label_store.py</text>
+    </g>
+    <g>
+      <rect x="340" y="716" width="244" height="124" rx="12" fill="#edf1eb"/>
+      <text class="heading" x="357" y="755">检查回归护栏</text>
+      <text class="detail" x="357" y="787">复核召回与进出网变化</text>
+      <text class="code" x="357" y="817">harness.py</text>
+    </g>
+    <g>
+      <rect x="616" y="716" width="244" height="124" rx="12" fill="#edf1eb"/>
+      <text class="heading" x="633" y="755">生成归因队列</text>
+      <text class="detail" x="633" y="787">列出漏召回等异常线索</text>
+      <text class="code" x="633" y="817">attribution.py</text>
+    </g>
+    <g>
+      <rect x="892" y="716" width="244" height="124" rx="12" fill="#eef0f4"/>
+      <text class="heading" x="909" y="755">更新看板</text>
+      <text class="detail" x="909" y="787">汇总本轮进展与指标</text>
+      <text class="code" x="909" y="817">dashboard.py</text>
+    </g>
+
+    <path class="flow" d="M310 778H336"/>
+    <path class="flow" d="M586 778H612"/>
+    <path class="flow" d="M862 778H888"/>
+  </g>
+
+  <path class="return" d="M738 842V890H28V192H59"/>
+  <text class="return-label" x="714" y="877" text-anchor="end">先模拟，再由 HM 确认规则变更</text>
+
+  <path class="flow" d="M65 931H101"/>
+  <text class="meta" x="113" y="938">工作流</text>
+  <path class="return" d="M224 931H260"/>
+  <text class="meta" x="272" y="938">反馈与人工校准</text>
 </svg>

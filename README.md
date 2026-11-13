@@ -6,7 +6,7 @@
 >
 > **协作假设**:团队成员都在飞书办公,每人本机有 AI 编程助手与 lark-cli;HR/HM 只碰飞书表格,管道由任一成员的 AI 助手操作。角色分工见 [playbook/TEAM-GUIDE.md](playbook/TEAM-GUIDE.md);AI 助手打开本仓会自动读 [CLAUDE.md](CLAUDE.md)/[AGENTS.md](AGENTS.md) 自举上手。
 
-![简历筛选架构：规则粗排与 LLM 精读、人在环决策、运营反馈](assets/system-overview.svg)
+![简历筛选架构：规则粗排、LLM 精读、人工评估与面试、运营反馈](assets/system-overview.svg)
 
 ## 三层结构
 
