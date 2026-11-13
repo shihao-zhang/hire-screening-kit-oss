@@ -1,133 +1,153 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="876" viewBox="0 0 1200 876" role="img" aria-labelledby="title description">
-  <title id="title">hire-screening-kit 架构图</title>
-  <desc id="description">飞书招聘只读接入。投递进入私有工作区，由规则粗排和 LLM 精读，再经人工确认同步多维表格并回读。人工评估和面试进展进入手动飞轮，形成回归护栏、归因和看板。规则调整先模拟，再由人确认。</desc>
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1016" viewBox="0 0 1200 1016" role="img" aria-labelledby="title description">
+  <title id="title">hire-screening-kit 架构与人在环</title>
+  <desc id="description">AI 助手和脚本只读接入飞书招聘，运行规则粗排、LLM 精读并合并结果。在场操作员确认外部写入并触发飞轮。HM 在多维表格复核和决策，HR 负责触达及更新记录。人工评估与面试进展进入标签和回归护栏，HM 根据模拟结果决定是否修改规则。</desc>
   <defs>
     <marker id="arrow" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="6" markerHeight="6" orient="auto">
       <path d="M0 0 10 5 0 10z" fill="#607e70"/>
     </marker>
-    <marker id="feedback" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="6" markerHeight="6" orient="auto">
-      <path d="M0 0 10 5 0 10z" fill="#846b42"/>
+    <marker id="human-arrow" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M0 0 10 5 0 10z" fill="#92502e"/>
     </marker>
     <style>
       text { font-family: "PingFang SC", "Microsoft YaHei", "Noto Sans CJK SC", "WenQuanYi Micro Hei", sans-serif; fill: #263f36; }
       .title { font-size: 40px; font-weight: 700; }
       .subtitle { font-size: 23px; fill: #496456; }
-      .section { font-size: 27px; font-weight: 700; }
+      .section { font-size: 26px; font-weight: 700; }
       .heading { font-size: 24px; font-weight: 650; }
       .detail { font-size: 20px; fill: #455d50; }
       .meta { font-size: 19px; fill: #51695b; }
       .code { font-family: ui-monospace, "SFMono-Regular", Consolas, monospace; font-size: 18px; fill: #496456; }
-      .flow { fill: none; stroke: #607e70; stroke-width: 2.4; marker-end: url(#arrow); }
-      .return { fill: none; stroke: #846b42; stroke-width: 2.3; stroke-dasharray: 7 6; stroke-linejoin: round; marker-end: url(#feedback); }
-      .return-label { font-size: 20px; fill: #6e5733; }
+      .human-title { font-size: 29px; font-weight: 700; }
+      .human-heading { font-size: 24px; font-weight: 700; fill: #62371f; }
+      .human-copy { font-size: 20px; fill: #65472f; }
+      .human-role { font-size: 19px; font-weight: 650; fill: #854b2c; }
+      .flow, .decision, .feedback { fill: none; stroke-linejoin: round; }
+      .flow { stroke: #607e70; stroke-width: 2.4; marker-end: url(#arrow); }
+      .decision, .feedback { stroke: #92502e; stroke-width: 2.5; marker-end: url(#human-arrow); }
+      .feedback { stroke-dasharray: 7 6; }
     </style>
   </defs>
 
-  <rect width="1200" height="876" fill="#f8f7f3"/>
+  <rect width="1200" height="1016" fill="#f8f7f3"/>
   <text class="title" x="64" y="66">hire-screening-kit</text>
-  <text class="subtitle" x="64" y="103">简历筛选架构 · 两层漏斗与数据飞轮</text>
+  <text class="subtitle" x="64" y="103">两层筛选与人工决策</text>
 
-  <g aria-label="系统边界">
-    <rect x="64" y="133" width="340" height="118" rx="14" fill="#f3eee3"/>
-    <text class="heading" x="85" y="169">私有实例</text>
-    <text class="detail" x="85" y="201">岗位 TOML、精读 rubric</text>
-    <text class="detail" x="85" y="229">简历与运行产物保存在仓外</text>
+  <g aria-label="AI 助手与脚本执行筛选">
+    <rect x="48" y="134" width="1104" height="210" rx="18" fill="#dce8df"/>
+    <text class="section" x="64" y="174">筛选主流程</text>
+    <text class="meta" x="1136" y="173" text-anchor="end">AI 助手与脚本执行</text>
 
-    <rect x="430" y="133" width="340" height="118" rx="14" fill="#edf1eb"/>
-    <text class="heading" x="451" y="169">筛选内核</text>
-    <text class="detail" x="451" y="201">配置驱动评分、精读合并</text>
-    <text class="detail" x="451" y="229">标签、回归护栏与归因</text>
+    <rect x="64" y="196" width="192" height="122" rx="12" fill="#f4f7f2"/>
+    <text class="heading" x="80" y="232">增量入库</text>
+    <text class="detail" x="80" y="266">飞书招聘只读拉取</text>
+    <text class="detail" x="80" y="294">存入私有工作区</text>
 
-    <rect x="796" y="133" width="340" height="118" rx="14" fill="#eef0f4"/>
-    <text class="heading" x="817" y="169">飞书适配</text>
-    <text class="detail" x="817" y="201">招聘系统仅用 bot 读取</text>
-    <text class="detail" x="817" y="229">经确认以 user 写表格／云文档</text>
+    <rect x="284" y="196" width="192" height="122" rx="12" fill="#f4f7f2"/>
+    <text class="heading" x="300" y="232">规则粗排</text>
+    <text class="detail" x="300" y="266">按岗位 TOML 评分</text>
+    <text class="detail" x="300" y="294">产出排名与精读网</text>
+
+    <rect x="504" y="196" width="192" height="122" rx="12" fill="#f4f7f2"/>
+    <text class="heading" x="520" y="232">LLM 精读</text>
+    <text class="detail" x="520" y="266">为新进网者建档</text>
+    <text class="detail" x="520" y="294">按 rubric 分批评阅</text>
+
+    <rect x="724" y="196" width="192" height="122" rx="12" fill="#f4f7f2"/>
+    <text class="heading" x="740" y="232">合并结果</text>
+    <text class="detail" x="740" y="266">汇总评分与精读</text>
+    <text class="detail" x="740" y="294">生成待同步数据</text>
+
+    <rect x="944" y="196" width="192" height="122" rx="12" fill="#eef0f4"/>
+    <text class="heading" x="960" y="232">同步与回读</text>
+    <text class="detail" x="960" y="266">获准后写多维表格</text>
+    <text class="detail" x="960" y="294">逐项核对写入结果</text>
+
+    <path class="flow" d="M258 252H280"/>
+    <path class="flow" d="M478 252H500"/>
+    <path class="flow" d="M698 252H720"/>
+    <path class="flow" d="M918 252H940"/>
   </g>
 
-  <g aria-label="筛选主流程">
-    <rect x="48" y="283" width="1104" height="224" rx="19" fill="#dce8df"/>
-    <text class="section" x="64" y="324">筛选主流程</text>
-    <text class="meta" x="1136" y="324" text-anchor="end">规则圈选 → LLM 精读 → 人工评估</text>
+  <g aria-label="人工操作与决策">
+    <rect x="48" y="416" width="1104" height="211" rx="18" fill="#f4dfc9" stroke="#c7946c" stroke-width="1.5"/>
+    <rect x="57" y="426" width="34" height="37" rx="8" fill="#854b2c"/>
+    <path d="M74 433a6 6 0 1 0 0 12 6 6 0 0 0 0-12zm-11 24a11 11 0 0 1 22 0z" fill="#fff3e8"/>
+    <text class="human-title" x="104" y="456" fill="#62371f">人在环 · HITL</text>
 
-    <g>
-      <rect x="64" y="349" width="192" height="130" rx="12" fill="#f4f7f2"/>
-      <text class="heading" x="80" y="387">增量入库</text>
-      <text class="detail" x="80" y="422">从飞书招聘拉取</text>
-      <text class="detail" x="80" y="450">合并到私有工作区</text>
-    </g>
-    <g>
-      <rect x="284" y="349" width="192" height="130" rx="12" fill="#f4f7f2"/>
-      <text class="heading" x="300" y="387">规则粗排</text>
-      <text class="detail" x="300" y="422">按岗位配置评分</text>
-      <text class="detail" x="300" y="450">产出排名与精读网</text>
-    </g>
-    <g>
-      <rect x="504" y="349" width="192" height="130" rx="12" fill="#f4f7f2"/>
-      <text class="heading" x="520" y="387">LLM 精读</text>
-      <text class="detail" x="520" y="422">为新进网者建档</text>
-      <text class="detail" x="520" y="450">按 rubric 分批评阅</text>
-    </g>
-    <g>
-      <rect x="724" y="349" width="192" height="130" rx="12" fill="#f4f7f2"/>
-      <text class="heading" x="740" y="387">合并与同步</text>
-      <text class="detail" x="740" y="422">合并两层结果</text>
-      <text class="detail" x="740" y="450">确认后写入、回读</text>
-    </g>
-    <g>
-      <rect x="944" y="349" width="192" height="130" rx="12" fill="#f3eee3"/>
-      <text class="heading" x="960" y="387">人工评估</text>
-      <text class="detail" x="960" y="422">在多维表格复核</text>
-      <text class="detail" x="960" y="450">由 HM／HR 决策</text>
-    </g>
+    <rect x="64" y="477" width="244" height="132" rx="12" fill="#fff8ed"/>
+    <text class="human-role" x="81" y="504">HM</text>
+    <text class="human-heading" x="81" y="536">定规则与 rubric</text>
+    <text class="human-copy" x="81" y="566">先模拟进出网变化</text>
+    <text class="human-copy" x="81" y="593">确认后更新岗位配置</text>
 
-    <path class="flow" d="M258 414H280"/>
-    <path class="flow" d="M478 414H500"/>
-    <path class="flow" d="M698 414H720"/>
-    <path class="flow" d="M918 414H940"/>
+    <rect x="340" y="477" width="244" height="132" rx="12" fill="#fff8ed"/>
+    <text class="human-role" x="357" y="504">操作员</text>
+    <text class="human-heading" x="357" y="536">触发运营飞轮</text>
+    <text class="human-copy" x="357" y="566">在场启动刷新与校验</text>
+    <text class="human-copy" x="357" y="593">确认覆写看板</text>
+
+    <rect x="616" y="477" width="244" height="132" rx="12" fill="#fff8ed"/>
+    <text class="human-role" x="633" y="504">操作员</text>
+    <text class="human-heading" x="633" y="536">批准同步写入</text>
+    <text class="human-copy" x="633" y="566">逐轮确认同步范围</text>
+    <text class="human-copy" x="633" y="593">检查回读核验结果</text>
+
+    <rect x="892" y="477" width="244" height="132" rx="12" fill="#fff8ed"/>
+    <text class="human-role" x="909" y="504">HM / HR</text>
+    <text class="human-heading" x="909" y="536">复核与推进</text>
+    <text class="human-copy" x="909" y="566">HM 写评语、决定推进</text>
+    <text class="human-copy" x="909" y="593">HR 触达、更新记录</text>
   </g>
 
-  <path class="return" d="M1040 481V548H186V614"/>
-  <text class="return-label" x="1021" y="535" text-anchor="end">人工评估与面试进展回流</text>
+  <path class="decision" d="M298 473V373H380V322"/>
+  <text class="human-role" x="286" y="365" text-anchor="end">采用岗位配置</text>
+  <path class="decision" d="M738 473V373H981V322"/>
+  <text class="human-role" x="752" y="365">批准写入</text>
+  <path class="flow" d="M1064 322V473"/>
+  <text class="meta" x="1078" y="395">结果表</text>
 
-  <g aria-label="手动运营飞轮">
-    <text class="section" x="64" y="598">运营飞轮</text>
-    <text class="meta" x="1136" y="597" text-anchor="end">操作者在场触发 · flywheel.sh</text>
+  <g aria-label="脚本执行运营飞轮">
+    <rect x="48" y="705" width="1104" height="196" rx="18" fill="#e7eee7"/>
+    <text class="section" x="64" y="741">运营飞轮</text>
+    <text class="code" x="1136" y="739" text-anchor="end">flywheel.sh</text>
 
-    <g>
-      <rect x="64" y="620" width="244" height="124" rx="12" fill="#edf1eb"/>
-      <text class="heading" x="81" y="659">刷新阶段与标签</text>
-      <text class="detail" x="81" y="691">汇总人工评估、面试信号</text>
-      <text class="code" x="81" y="721">label_store.py</text>
-    </g>
-    <g>
-      <rect x="340" y="620" width="244" height="124" rx="12" fill="#edf1eb"/>
-      <text class="heading" x="357" y="659">检查回归护栏</text>
-      <text class="detail" x="357" y="691">复核召回与进出网变化</text>
-      <text class="code" x="357" y="721">harness.py</text>
-    </g>
-    <g>
-      <rect x="616" y="620" width="244" height="124" rx="12" fill="#edf1eb"/>
-      <text class="heading" x="633" y="659">生成归因队列</text>
-      <text class="detail" x="633" y="691">列出漏召回等异常线索</text>
-      <text class="code" x="633" y="721">attribution.py</text>
-    </g>
-    <g>
-      <rect x="892" y="620" width="244" height="124" rx="12" fill="#eef0f4"/>
-      <text class="heading" x="909" y="659">更新看板</text>
-      <text class="detail" x="909" y="691">汇总本轮进展与指标</text>
-      <text class="code" x="909" y="721">dashboard.py</text>
-    </g>
+    <rect x="64" y="763" width="244" height="120" rx="12" fill="#f4f7f2"/>
+    <text class="heading" x="81" y="801">刷新阶段与标签</text>
+    <text class="detail" x="81" y="834">汇总评语与面试信号</text>
+    <text class="code" x="81" y="864">label_store.py</text>
 
-    <path class="flow" d="M310 682H336"/>
-    <path class="flow" d="M586 682H612"/>
-    <path class="flow" d="M862 682H888"/>
+    <rect x="340" y="763" width="244" height="120" rx="12" fill="#f4f7f2"/>
+    <text class="heading" x="357" y="801">检查回归护栏</text>
+    <text class="detail" x="357" y="834">检查召回与进出网变化</text>
+    <text class="code" x="357" y="864">harness.py</text>
+
+    <rect x="616" y="763" width="244" height="120" rx="12" fill="#f4f7f2"/>
+    <text class="heading" x="633" y="801">生成归因队列</text>
+    <text class="detail" x="633" y="834">列出漏召回等异常线索</text>
+    <text class="code" x="633" y="864">attribution.py</text>
+
+    <rect x="892" y="763" width="244" height="120" rx="12" fill="#eef0f4"/>
+    <text class="heading" x="909" y="801">更新看板</text>
+    <text class="detail" x="909" y="834">汇总进展与指标</text>
+    <text class="code" x="909" y="864">dashboard.py</text>
+
+    <path class="flow" d="M310 823H336"/>
+    <path class="flow" d="M586 823H612"/>
+    <path class="flow" d="M862 823H888"/>
   </g>
 
-  <path class="return" d="M738 746V794H28V192H59"/>
-  <text class="return-label" x="714" y="781" text-anchor="end">调整规则前先模拟；配置变更由人确认</text>
+  <path class="decision" d="M462 612V653H193V759"/>
+  <text class="human-role" x="448" y="645" text-anchor="end">人工启动</text>
+  <path class="feedback" d="M1014 612V686H246V759"/>
+  <text class="human-role" x="1000" y="678" text-anchor="end">人工评估与面试进展回流</text>
 
-  <path class="flow" d="M65 835H101"/>
-  <text class="meta" x="113" y="842">工作流</text>
-  <path class="return" d="M224 835H260"/>
-  <text class="meta" x="272" y="842">反馈与人工校准</text>
+  <path class="feedback" d="M738 886V947H28V542H60"/>
+  <text class="human-role" x="724" y="938" text-anchor="end">HM 复核异常线索，决定是否校准规则</text>
+
+  <path class="flow" d="M65 983H101"/>
+  <text class="meta" x="113" y="990">数据流</text>
+  <path class="decision" d="M219 983H255"/>
+  <text class="human-role" x="267" y="990">人工决定或触发</text>
+  <path class="feedback" d="M454 983H490"/>
+  <text class="human-role" x="502" y="990">反馈回流</text>
 </svg>

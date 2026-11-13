@@ -3,7 +3,7 @@
 协作假设:团队成员都在飞书办公;每人电脑装有 AI 编程助手(Claude Code / Codex)与
 `lark-cli`;**所有人机交互都发生在飞书里**——结果表、常驻看板、飞书消息,没有别的界面。
 
-![简历筛选架构：规则粗排、LLM 精读、人工评估与数据飞轮](../assets/system-overview.svg)
+![简历筛选架构：规则粗排与 LLM 精读、人在环决策、运营反馈](../assets/system-overview.svg)
 
 ## 0. 三个角色
 
